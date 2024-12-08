@@ -15,6 +15,27 @@ def cond_probability(word1, word2):
     probability = word_pairs[(word1, word2)] / word_count[word1]
     return probability
 
+def generate_sentence():
+    '''
+    Function that generates a sentence based on conditional probability
+    '''
+    global word_pairs
+
+    sentence = list()
+    token = '<|start|>' # Sentences start with this token
+    while token != '<|end|>':
+        sentence.append(token)
+        next_word_candidates = dict()   # Store candidate next words and their conditional probabilities
+        for pair in word_pairs.keys():
+            if pair[0] == token:
+                next_word_candidates[pair[1]] = cond_probability(token, pair[1])
+
+        # Apply random sampling based on the conditional probability distribution
+        token = np.random.choice(list(next_word_candidates.keys()), p=list(next_word_candidates.values()))
+    
+    sentence.append(token)
+    return sentence
+
 if __name__ == "__main__":
     word_count = dict()
     word_pairs = dict()
@@ -37,17 +58,6 @@ if __name__ == "__main__":
                     word_pairs[word_pair] = 0
                 word_pairs[word_pair] += 1
 
-    sentence = list()
-    token = '<|start|>' # Sentences start with this token
-    while token != '<|end|>':
-        sentence.append(token)
-        next_word_candidates = dict()   # Store candidate next words and their conditional probabilities
-        for pair in word_pairs.keys():
-            if pair[0] == token:
-                next_word_candidates[pair[1]] = cond_probability(token, pair[1])
-
-        # Apply random sampling based on the conditional probability distribution
-        token = np.random.choice(list(next_word_candidates.keys()), p=list(next_word_candidates.values()))
-    
-    sentence.append(token)
-    print(' '.join(sentence))
+    for i in range(5):
+        sentence = generate_sentence()
+        print(' '.join(sentence))
